@@ -4,7 +4,6 @@ from Crypto.Random import get_random_bytes
 import base64
 import os
 
-# Load RSA keys
 def load_rsa_public_key(path):
     with open(path, 'rb') as f:
         return RSA.import_key(f.read())

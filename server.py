@@ -8,11 +8,12 @@ client_public_key = load_rsa_public_key("keys/client_public.pem")
 
 HOST = '127.0.0.1'
 PORT = 65432
-TIMEOUT = 1  # short timeout to check for KeyboardInterrupt
+TIMEOUT = 1 # Used to stop server on keyboard interrupts
 
 clients = []
 lock = threading.Lock()
 
+# Broadcasts to every connected client
 def broadcast(sender_socket, encrypted_payload):
     with lock:
         for client in clients:
@@ -34,6 +35,7 @@ def handle_client(conn, addr):
             if not data:
                 break
             encrypted_payload = json.loads(data.decode())
+            # Displays decrypted payload to the server and then encrypts it to broadcast to each client
             plaintext = decrypt_message(encrypted_payload, server_private_key)
             print(f"[{addr}] {plaintext}")
             rebroadcast = encrypt_message(plaintext, client_public_key)
@@ -62,7 +64,7 @@ def start_server():
                     conn, addr = s.accept()
                     threading.Thread(target=handle_client, args=(conn, addr), daemon=True).start()
                 except socket.timeout:
-                    continue  # allow loop to check for Ctrl+C
+                    continue 
         except KeyboardInterrupt:
             print("\n[*] Server interrupted. Shutting down.")
 

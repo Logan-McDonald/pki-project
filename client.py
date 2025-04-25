@@ -3,7 +3,6 @@ import threading
 import json
 from crypto_utils import encrypt_message, decrypt_message, load_rsa_private_key, load_rsa_public_key
 
-# Load keys
 client_private_key = load_rsa_private_key("keys/client_private.pem")
 server_public_key = load_rsa_public_key("keys/server_public.pem")
 
@@ -18,6 +17,7 @@ def receive_messages(sock):
             if not data:
                 break
             enc_payload = json.loads(data.decode())
+            # Decrypts message using client priv key
             msg = decrypt_message(enc_payload, client_private_key)
             print(f"\nPeer: {msg}\n> ", end="")
         except Exception as e:
@@ -39,7 +39,8 @@ def main():
             msg = input("> ")
             if not msg.strip():
                 continue
-            enc = encrypt_message(msg, server_public_key)
+            # Encrypts message using server pub key before sending
+            enc = encrypt_message(msg, server_public_key) 
             sock.sendall(json.dumps(enc).encode())
     except KeyboardInterrupt:
         print("\nExiting chat.")
